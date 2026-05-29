@@ -2,7 +2,7 @@
 
 A personal stock watchlist and portfolio dashboard with real-time quotes, price history charts, and dark mode.
 
-**Live demo:** [your-demo-link-here](#)
+**Live demo:** [finance-dashoard.vercel.app](https://finance-dashoard.vercel.app)
 
 ---
 
@@ -43,7 +43,7 @@ A personal stock watchlist and portfolio dashboard with real-time quotes, price 
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/finance-dashboard.git
+git clone https://github.com/pankhudi-priyal/finance-dashoard.git
 cd finance-dashboard
 ```
 
