@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# FinanceDash
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal stock watchlist and portfolio dashboard with real-time quotes, price history charts, and dark mode.
 
-Currently, two official plugins are available:
+**Live demo:** [your-demo-link-here](#)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&labelColor=20232a)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white&labelColor=1a1a2e)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38BDF8?logo=tailwindcss&logoColor=white&labelColor=0f172a)
+![Supabase](https://img.shields.io/badge/Supabase-Auth_%26_DB-3ECF8E?logo=supabase&logoColor=white&labelColor=1c1c1c)
+![Recharts](https://img.shields.io/badge/Recharts-3-22b5bf?logoColor=white&labelColor=1c1c1c)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-black?logo=framer&logoColor=white)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Live stock quotes** — real-time price, day change, high/low via Finnhub API
+- **Watchlist** — add/remove symbols, persisted to Supabase with Row Level Security
+- **Price history chart** — 30-day chart anchored to the real current price
+- **Dark mode** — system preference detection + manual toggle, persisted to localStorage
+- **Authentication** — email/password login via Supabase Auth with protected routes
+- **Loading skeletons** — skeleton placeholders for all async states (no spinners)
+- **Entrance animations** — Framer Motion animations on dashboard cards
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Layer | Technology |
+|---|---|
+| Frontend | React 19 + TypeScript |
+| Build | Vite |
+| Styling | Tailwind CSS v4 |
+| Auth & DB | Supabase |
+| Charts | Recharts |
+| Animations | Framer Motion |
+| Stock Data | Finnhub API |
+| Routing | React Router v7 |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourusername/finance-dashboard.git
+cd finance-dashboard
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install dependencies
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+### 3. Set up environment variables
+
+Create a `.env` file in the project root:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_FINNHUB_API_KEY=your-finnhub-key
+```
+
+- **Supabase** — create a free project at [supabase.com](https://supabase.com), find credentials under *Project Settings → API*
+- **Finnhub** — get a free API key at [finnhub.io](https://finnhub.io/register)
+
+### 4. Set up the database
+
+Run the following in your Supabase **SQL Editor**:
+
+```sql
+CREATE TABLE watchlist (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id    UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  symbol     TEXT        NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, symbol)
+);
+
+ALTER TABLE watchlist ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "select_own" ON watchlist FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "insert_own" ON watchlist FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "delete_own" ON watchlist FOR DELETE USING (auth.uid() = user_id);
+```
+
+### 5. Run the dev server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+## Notes
+
+- **Historical chart data** — Finnhub's candle endpoint is restricted on the free tier. Price history is simulated using a seeded random walk anchored to the real current price, so the chart endpoint and final price point are always accurate.
+- **Rate limiting** — the Finnhub API wrapper includes a 1-minute in-memory cache to stay within free tier limits.
