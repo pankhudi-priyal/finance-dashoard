@@ -197,7 +197,7 @@ export default function Dashboard() {
                     fontSize: 12, borderRadius: 8,
                     border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
-                  formatter={(v: number) => [`$${v}`, 'Price']}
+                  formatter={(v: number | undefined) => v !== undefined ? [`$${v.toFixed(2)}`, 'Price'] : ['', 'Price']}
                 />
                 <Line
                   type="monotone"
